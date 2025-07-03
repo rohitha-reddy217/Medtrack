@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedTrack – Patient Dashboard</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ======== GLOBAL DESIGN SYSTEM ======== */
+    :root{--primary-blue:#0077b6;--dark-blue:#023e8a;--light-blue:#00b4d8;--accent-pink:#ff3366;--light-teal:#90e0ef;--pure-white:#ffffff;--light-gray:#f8f9fa;--medium-gray:#6c757d;--dark-gray:#343a40;--heading-font:'Poppins',sans-serif;--body-font:'Poppins',sans-serif}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--body-font);background:var(--light-gray);color:var(--dark-gray);line-height:1.6}
+    a{text-decoration:none;color:inherit}
+
+    /* ===== NAVBAR ===== */
+    .navbar{display:flex;justify-content:space-between;align-items:center;padding:15px 5%;background:var(--dark-blue);color:var(--pure-white);box-shadow:0 2px 20px rgba(0,74,124,.1);position:sticky;top:0;z-index:100}
+    .logo{display:flex;align-items:center;font-size:1.8rem;font-weight:700}
+    .logo-img{width:40px;height:40px;border-radius:50%;background:var(--pure-white);display:flex;justify-content:center;align-items:center;margin-right:12px;position:relative}
+    .pulse-line{position:absolute;width:80%;height:3px;background:var(--accent-pink);top:50%;left:10%;transform:translateY(-50%);animation:pulse 1.5s infinite}
+    .pulse-line::before{content:"❤️";position:absolute;left:50%;top:-15px;transform:translateX(-50%);font-size:16px;color:var(--accent-pink)}
+    @keyframes pulse{0%{transform:translateY(-50%) scaleX(.8)}50%{transform:translateY(-50%) scaleX(1.1)}100%{transform:translateY(-50%) scaleX(.8)}}
+    .logo-text span:nth-child(1),.logo-text span:nth-child(3){color:var(--light-teal)}
+
+    .profile-badge{width:40px;height:40px;background:var(--pure-white);color:var(--primary-blue);border-radius:50%;display:flex;justify-content:center;align-items:center;font-weight:700;margin-left:20px}
+
+    /* ===== LAYOUT ===== */
+    .layout{display:flex}
+    .sidebar{width:240px;background:var(--pure-white);box-shadow:0 0 10px rgba(0,0,0,.05);padding:30px 20px;display:none;flex-direction:column;gap:20px;position:fixed;top:0;left:0;height:100vh;z-index:90}
+    .sidebar a{display:flex;align-items:center;gap:8px;color:var(--dark-gray);font-weight:500;transition:.3s}
+    .sidebar a:hover{color:var(--primary-blue)}
+    @media(min-width:768px){.sidebar{display:flex}}
+
+    .content{flex:1;padding:40px 5%;margin-left:0}
+    @media(min-width:768px){.content{margin-left:240px}}
+
+    /* ===== SECTION & CARDS ===== */
+    .card{background:var(--pure-white);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:25px;margin-bottom:40px}
+    .card-title{font-size:1.2rem;font-weight:600;margin-bottom:20px;color:var(--dark-blue)}
+    .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:.75rem;font-weight:600;background:rgba(46,204,113,.15);color:#2ecc71}
+
+    /* ===== BUTTONS ===== */
+    .btn{display:inline-block;padding:10px 24px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;transition:.3s}
+    .btn-primary{background:linear-gradient(to right,var(--primary-blue),var(--light-blue));color:var(--pure-white)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,180,216,.3)}
+    .btn-outline{background:none;border:2px solid var(--primary-blue);color:var(--primary-blue)}
+    .btn-outline:hover{background:var(--primary-blue);color:var(--pure-white)}
+
+    /* ===== TABLE / LIST ===== */
+    .list-item{border-bottom:1px solid #eee;padding:15px 0}
+    .list-item:last-child{border:none}
+
+    /* ===== MODAL ===== */
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:200;display:none}
+    .modal-content{background:var(--pure-white);border-radius:12px;padding:30px;width:90%;max-width:500px;box-shadow:0 5px 15px rgba(0,0,0,.15)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .close-btn{background:none;border:none;font-size:24px;color:var(--medium-gray);cursor:pointer}
+    .close-btn:hover{color:var(--dark-gray)}
+    .modal-form input,.modal-form textarea,.modal-form select{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:inherit;margin-bottom:15px;font-size:.95rem}
+    .modal-form textarea{resize:vertical;min-height:80px}
+
+    /* ===== MOBILE TOGGLE ===== */
+    .hamburger{background:none;border:none;font-size:28px;color:var(--pure-white);display:inline-block;cursor:pointer;margin-left:15px}
+    @media(min-width:768px){.hamburger{display:none}}
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo"><div class="logo-img"><div class="pulse-line"></div></div><span class="logo-text"><span>M</span>ed<span>T</span>rack</span></div>
+    <div style="display:flex;align-items:center">
+      <span id="welcomeTxt" style="margin-right:15px;display:none">Welcome, Patient</span>
+      <div class="profile-badge" id="profileBadge">P</div>
+      <button class="hamburger" id="hamburgerBtn">☰</button>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a href="#appointments">🗕 Appointments</a>
+    <a href="#records">📋 Records</a>
+    <a href="#prescriptions">💊 Prescriptions</a>
+    <a href="#doctors">🏥 Doctors</a>
+    <a href="/dashboard">📊 Dashboard</a>
+    <a href="/logout" style="color:#e74c3c">🚪 Logout</a>
+  </aside>
+
+  <!-- Content -->
+  <main class="content">
+    <!-- Appointments -->
+    <section id="appointments" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 class="card-title">Upcoming Appointments</h2>
+        <button class="btn btn-primary" id="openModalBtn">+ Book</button>
+      </div>
+      <div id="apptList"></div>
+    </section>
+
+    <!-- Prescriptions -->
+    <section id="prescriptions" class="card">
+      <h2 class="card-title">Recent Prescriptions</h2>
+      <div id="prescriptionList"></div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header"><h3 style="font-size:1.1rem;font-weight:600">Book Appointment</h3><button class="close-btn" id="closeModalBtn">×</button></div>
+      <form class="modal-form" id="bookForm" action="/patient/book" method="POST">
+        <select name="doctorId" id="doctorSelect" required></select>
+        <input type="date" name="date" required>
+        <input type="time" name="time" required>
+        <textarea name="reason" placeholder="Reason" required></textarea>
+        <div style="display:flex;justify-content:flex-end;gap:15px"><button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button><button class="btn btn-primary" type="submit">Book</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">© <script>document.write(new Date().getFullYear())</script> MedTrack. All rights reserved.</footer>
+
+<script>
+  // Dummy data (replace with server data / templating)
+  const patient={name:"John Doe"};
+  const doctors=[{id:1,name:"Dr. Jane Smith",specialization:"Cardiology"},{id:2,name:"Dr. Arun Kumar",specialization:"Dermatology"}];
+  const appointments=[{doctorName:"Dr. Jane Smith",specialty:"Cardiology",date:"2025-07-05",time:"10:00",status:"Confirmed"}];
+  const prescriptions=[{doctorName:"Dr. Arun Kumar",date:"2025-06-20",precautions:"Take after meals"}];
+
+  // Init UI
+  document.getElementById('welcomeTxt').style.display='block';
+  document.getElementById('welcomeTxt').textContent=`Welcome, ${patient.name}`;
+  document.getElementById('profileBadge').textContent=patient.name.split(' ').map(n=>n[0]).join('');
+
+  // Sidebar toggle
+  document.getElementById('hamburgerBtn').addEventListener('click',()=>{document.getElementById('sidebar').classList.toggle('hidden')});
+
+  // Render appointments
+  const apptList=document.getElementById('apptList');
+  appointments.forEach(app=>{
+    apptList.insertAdjacentHTML('beforeend',`<div class="list-item"><strong>${app.doctorName}</strong> – ${app.specialty}<br><span style="font-size:.85rem;color:var(--medium-gray)">${app.date} at ${app.time}</span><br><span class="badge">${app.status}</span></div>`)
+  });
+
+  // Render prescriptions
+  const presList=document.getElementById('prescriptionList');
+  prescriptions.forEach(p=>{
+    presList.insertAdjacentHTML('beforeend',`<div class="list-item"><strong>${p.doctorName}</strong> <span style="font-size:.85rem;color:var(--medium-gray)">${p.date}</span><br><span style="font-size:.9rem">Precautions: ${p.precautions}</span></div>`)
+  });
+
+  // Populate doctor select
+  const sel=document.getElementById('doctorSelect');
+  doctors.forEach(d=>sel.insertAdjacentHTML('beforeend',`<option value="${d.id}">${d.name} (${d.specialization})</option>`));
+
+  // Modal controls
+  const modal=document.getElementById('modal');
+  document.getElementById('openModalBtn').onclick=()=>{modal.style.display='flex';document.body.style.overflow='hidden'};
+  const closeModal=()=>{modal.style.display='none';document.body.style.overflow='auto'};
+  document.getElementById('closeModalBtn').onclick=closeModal;document.getElementById('cancelBtn').onclick=closeModal;window.onclick=e=>{if(e.target===modal)closeModal()};
+</script>
+</body>
+</html>
