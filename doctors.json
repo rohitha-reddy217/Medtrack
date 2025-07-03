@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1751042261358,
+    "name": "rohitha duggempudi",
+    "specialization": "cardiologist",
+    "license": "1234",
+    "experience": "3",
+    "hospital": "annapurna srinivas hospitals",
+    "email": "rohithaduggempudi@gmail.com",
+    "phone": "07989883587",
+    "address": "H-no 11-49,challavaripalem,nallapadu,guntur.",
+    "password": "$2b$10$ZfG2os09nTwlnOkfnKglDuSmh7eaExLLFAWzygYmV4KzO.GBs8Tty",
+    "role": "doctor"
+  }
+]
